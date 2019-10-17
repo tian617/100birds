@@ -8,8 +8,11 @@ namespace cb
 {
 void readCallback(struct bufferevent *bev, void *conn)
 {
+  printf("read\n");
   struct evbuffer *input = bufferevent_get_input(bev);
   size_t len = evbuffer_get_length(input);
+  printf("data len:%ld\n",len);
+
   if (len < EvbufferHeadLength)
   {
     return;
@@ -23,6 +26,8 @@ void readCallback(struct bufferevent *bev, void *conn)
     return;
   }
 
+
+  // fix use length
   int arraySize = n + EvbufferHeadLength + 1;
   char data[arraySize];
   evbuffer_remove(input, data, arraySize - 1);

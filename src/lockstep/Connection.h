@@ -11,7 +11,6 @@ class Connection
 {
 
 public:
-  // network class : std::bind(&NetworkManager::xcb,this,conn,_1)
   typedef std::function<void(const char *data)> MessageCallback;
   typedef std::function<void()> CloseCallback;
 

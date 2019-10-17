@@ -21,7 +21,6 @@ struct CallBack
   {
     messageCb_(conn, data);
   }
-
 } cb;
 } // namespace detail
 
@@ -60,7 +59,7 @@ NetworkManager::NetworkManager(std::string ip, int port)
                                                             LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1,
                                                             reinterpret_cast<sockaddr *>(&sin), sizeof(sin));
   evconnlistener_set_error_cb(listener, acceptErrorCallback);
-  
+
   detail::cb.closeCb_ = [&](const ConnectionPtr &conn) { connects_.erase(conn); };
 }
 
