@@ -1,6 +1,7 @@
 #include "Connection.h"
 #include <string.h>
 #include <assert.h>
+#include <arpa/inet.h>
 
 #define EvbufferHeadLength 2
 
@@ -11,7 +12,6 @@ void readCallback(struct bufferevent *bev, void *conn)
   printf("read\n");
   struct evbuffer *input = bufferevent_get_input(bev);
   size_t len = evbuffer_get_length(input);
-  printf("data len:%ld\n",len);
 
   if (len < EvbufferHeadLength)
   {
@@ -26,8 +26,6 @@ void readCallback(struct bufferevent *bev, void *conn)
     return;
   }
 
-
-  // fix use length
   int arraySize = n + EvbufferHeadLength + 1;
   char data[arraySize];
   evbuffer_remove(input, data, arraySize - 1);
@@ -53,6 +51,7 @@ typedef Connection::MessageCallback MessageCallback;
 Connection::Connection(struct event_base *base, evutil_socket_t fd)
     : bev_(NULL)
 {
+  setName(fd);
   bev_ = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
   bufferevent_setcb(bev_, cb::readCallback, NULL, cb::eventCallback, this);
   bufferevent_enable(bev_, EV_READ);
@@ -74,4 +73,30 @@ void Connection::close() const
 {
   assert(closeCb_);
   closeCb_();
+}
+
+void Connection::send(const char *data, int len) const
+{
+  struct evbuffer *evbuf = evbuffer_new();
+  evbuffer_add(evbuf, &len, EvbufferHeadLength);
+  evbuffer_add(evbuf, data, len);
+  bufferevent_write_buffer(bev_, evbuf);
+}
+
+void Connection::send(const char *data) const
+{
+  send(data, strlen(data));
+}
+
+std::string Connection::name() const
+{
+  return name_;
+}
+
+void Connection::setName(int fd)
+{
+  struct sockaddr_in sin;
+  socklen_t len = sizeof(sin);
+  getpeername(fd, reinterpret_cast<sockaddr *>(&sin), &len);
+  name_ = std::string(inet_ntoa(sin.sin_addr)) + ":" + std::to_string(ntohs(sin.sin_port));
 }

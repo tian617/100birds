@@ -60,7 +60,10 @@ NetworkManager::NetworkManager(std::string ip, int port)
                                                             reinterpret_cast<sockaddr *>(&sin), sizeof(sin));
   evconnlistener_set_error_cb(listener, acceptErrorCallback);
 
-  detail::cb.closeCb_ = [&](const ConnectionPtr &conn) { connects_.erase(conn); };
+  detail::cb.closeCb_ = [&](const ConnectionPtr &conn) {
+    printf("close client: %s\n", conn->name());
+    connects_.erase(conn);
+  };
 }
 
 void NetworkManager::setConnectionCallback(ConnectionCallback &&cb)
@@ -76,7 +79,7 @@ void NetworkManager::setMessageCallback(MessageCallback &&cb)
   detail::cb.messageCb_ = std::move(cb);
 }
 
-void NetworkManager::run() const
+void NetworkManager::start() const
 {
   event_base_dispatch(base_);
 }

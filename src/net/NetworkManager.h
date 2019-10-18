@@ -1,5 +1,5 @@
-#ifndef TANK_LOCKSTEP_NETWORKMANAGER
-#define TANK_LOCKSTEP_NETWORKMANAGER
+#ifndef TANK_NET_NETWORKMANAGER_H
+#define TANK_NET_NETWORKMANAGER_H
 
 #include <event2/event.h>
 #include <event2/listener.h>
@@ -23,7 +23,7 @@ public:
 
   void setMessageCallback(MessageCallback &&cb);
 
-  void run() const;
+  void start() const;
 
 private:
   struct event_base *base_;
