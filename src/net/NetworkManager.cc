@@ -1,4 +1,5 @@
 #include "NetworkManager.h"
+#include "Timer.h"
 #include <arpa/inet.h>
 #include <assert.h>
 #include <string.h>
@@ -7,7 +8,9 @@ using std::placeholders::_1;
 typedef NetworkManager::ConnectionPtr ConnectionPtr;
 typedef NetworkManager::MessageCallback MessageCallback;
 typedef std::function<void(const ConnectionPtr &conn)> AddCallback;
-typedef std::function<void(const ConnectionPtr &conn)> CloseCallback;
+
+typedef std::weak_ptr<Connection> ConnectionWeakPtr;
+typedef std::function<void(const ConnectionWeakPtr& connPtr)> CloseCallback;
 
 namespace detail
 {
@@ -17,9 +20,9 @@ struct CallBack
   CloseCallback closeCb_;
   MessageCallback messageCb_;
 
-  void msgHandler(const ConnectionPtr &conn, const char *data)
+  void msgHandler(const Connection* conn, const char *data)
   {
-    messageCb_(conn, data);
+    // messageCb_(conn, data);
   }
 } cb;
 } // namespace detail
@@ -31,9 +34,12 @@ void acceptCallback(struct evconnlistener *listener,
   struct event_base *base = evconnlistener_get_base(listener);
   assert(base);
   ConnectionPtr conn(new Connection(base, fd));
-  conn->setCallbacks(std::bind(&detail::CallBack::msgHandler, &detail::cb, conn, _1),
-                     [=]() { detail::cb.closeCb_(conn); });
+  ConnectionWeakPtr cwp=conn;
+  Connection *c=conn.get();
+  conn->setCallbacks(std::bind(&detail::CallBack::msgHandler, &detail::cb, c, _1),
+                     [=]() { detail::cb.closeCb_(cwp); });
   detail::cb.addCb_(conn);
+
 }
 
 void acceptErrorCallback(struct evconnlistener *listener, void *ctx)
@@ -49,6 +55,8 @@ NetworkManager::NetworkManager(std::string ip, int port)
     : base_(event_base_new()),
       connects_()
 {
+  Timer::init(base_);
+  
   struct sockaddr_in sin;
   memset(&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
@@ -60,9 +68,9 @@ NetworkManager::NetworkManager(std::string ip, int port)
                                                             reinterpret_cast<sockaddr *>(&sin), sizeof(sin));
   evconnlistener_set_error_cb(listener, acceptErrorCallback);
 
-  detail::cb.closeCb_ = [&](const ConnectionPtr &conn) {
-    printf("close client: %s\n", conn->name());
-    connects_.erase(conn);
+  detail::cb.closeCb_ = [&](const ConnectionWeakPtr& conn) {
+    printf("close client: %s\n", conn.lock()->name().c_str());
+    connects_.erase(conn.lock());
   };
 }
 

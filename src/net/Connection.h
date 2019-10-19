@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-class Connection
+class Connection : public std::enable_shared_from_this<Connection>
 {
 
 public:
@@ -23,11 +23,15 @@ public:
 
   void close() const;
 
-  void send(const char* data,int len) const;
+  void send(const char *data, int len) const;
 
-  void send(const char* data) const;
+  void send(const char *data) const;
+
+  void send(const std::string &data) const;
 
   std::string name() const;
+
+  std::weak_ptr<const Connection> getWeak() const;
 
 private:
   void setName(int fd);
@@ -37,5 +41,7 @@ private:
   struct bufferevent *bev_;
   std::string name_;
 };
+
+typedef std::weak_ptr<const Connection> ConnectionWeak;
 
 #endif

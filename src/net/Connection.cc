@@ -9,7 +9,6 @@ namespace cb
 {
 void readCallback(struct bufferevent *bev, void *conn)
 {
-  printf("read\n");
   struct evbuffer *input = bufferevent_get_input(bev);
   size_t len = evbuffer_get_length(input);
 
@@ -88,9 +87,19 @@ void Connection::send(const char *data) const
   send(data, strlen(data));
 }
 
+void Connection::send(const std::string &data) const
+{
+  send(data.c_str());
+}
+
 std::string Connection::name() const
 {
   return name_;
+}
+
+std::weak_ptr<const Connection> Connection::getWeak() const
+{
+  return shared_from_this();
 }
 
 void Connection::setName(int fd)

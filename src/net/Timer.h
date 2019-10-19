@@ -3,12 +3,18 @@
 
 #include <event2/event.h>
 #include <functional>
+#include <memory>
 
 typedef std::function<void()> ExpiredCallback;
 class Timer
 {
+
 public:
-  explicit Timer(struct event_base * base);
+  Timer(const Timer &) = delete;
+  void operator=(const Timer &) = delete;
+  static void init(struct event_base *base);
+
+  static std::shared_ptr<Timer> instance();
 
   int runEvery(ExpiredCallback cb, float second);
 
@@ -17,9 +23,12 @@ public:
   void cancel(int taskId);
 
 private:
-  int setCb(ExpiredCallback cb, float second,bool once);
+  explicit Timer(struct event_base *base);
+  int setCb(ExpiredCallback cb, float second, bool once);
 
   struct event_base *base_;
+  static std::shared_ptr<Timer> self_;
+
 };
 
 #endif
