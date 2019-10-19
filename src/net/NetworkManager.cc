@@ -22,7 +22,7 @@ struct CallBack
 
   void msgHandler(const Connection* conn, const char *data)
   {
-    // messageCb_(conn, data);
+     messageCb_(conn, data);
   }
 } cb;
 } // namespace detail
@@ -78,7 +78,7 @@ void NetworkManager::setConnectionCallback(ConnectionCallback &&cb)
 {
   detail::cb.addCb_ = [&, cb](const ConnectionPtr &conn) {
     connects_.insert(conn);
-    cb(conn);
+    cb(conn.get());
   };
 }
 

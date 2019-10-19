@@ -14,8 +14,8 @@ class NetworkManager
 
 public:
   typedef std::shared_ptr<Connection> ConnectionPtr;
-  typedef std::function<void(const ConnectionPtr &conn)> ConnectionCallback;
-  typedef std::function<void(const ConnectionPtr &conn, const char *data)> MessageCallback;
+  typedef std::function<void(const Connection* conn)> ConnectionCallback;
+  typedef std::function<void(const Connection* conn, const char *data)> MessageCallback;
 
   explicit NetworkManager(std::string ip, int port);
 
