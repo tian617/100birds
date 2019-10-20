@@ -10,27 +10,31 @@ namespace cb
 void readCallback(struct bufferevent *bev, void *conn)
 {
   struct evbuffer *input = bufferevent_get_input(bev);
-  size_t len = evbuffer_get_length(input);
 
-  if (len < EvbufferHeadLength)
+  while (true)
   {
-    return;
-  }
-  char header[EvbufferHeadLength];
-  evbuffer_copyout(input, header, EvbufferHeadLength);
-  int16_t n;
-  ::memcpy(&n, header, EvbufferHeadLength);
-  if (len - EvbufferHeadLength < n)
-  {
-    return;
-  }
+    size_t len = evbuffer_get_length(input);
 
-  int arraySize = n + EvbufferHeadLength + 1;
-  char data[arraySize];
-  evbuffer_remove(input, data, arraySize - 1);
-  data[arraySize - 1] = '\0';
-  Connection *connection = static_cast<Connection *>(conn);
-  connection->msgcb()(data + EvbufferHeadLength);
+    if (len < EvbufferHeadLength)
+    {
+      return;
+    }
+    char header[EvbufferHeadLength];
+    evbuffer_copyout(input, header, EvbufferHeadLength);
+    int16_t n;
+    ::memcpy(&n, header, EvbufferHeadLength);
+    if (len - EvbufferHeadLength < n)
+    {
+      return;
+    }
+
+    int arraySize = n + EvbufferHeadLength + 1;
+    char data[arraySize];
+    evbuffer_remove(input, data, arraySize - 1);
+    data[arraySize - 1] = '\0';
+    Connection *connection = static_cast<Connection *>(conn);
+    connection->msgcb()(data + EvbufferHeadLength);
+  }
 }
 
 void eventCallback(struct bufferevent *bev, short events, void *conn)

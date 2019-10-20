@@ -39,7 +39,6 @@ void acceptCallback(struct evconnlistener *listener,
   conn->setCallbacks(std::bind(&detail::CallBack::msgHandler, &detail::cb, c, _1),
                      [=]() { detail::cb.closeCb_(cwp); });
   detail::cb.addCb_(conn);
-
 }
 
 void acceptErrorCallback(struct evconnlistener *listener, void *ctx)

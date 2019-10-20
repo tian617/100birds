@@ -73,11 +73,11 @@ Timer::Timer(struct event_base *base)
 
 int Timer::setCb(ExpiredCallback cb, float second, bool once)
 {
-  struct timeval tv = {(long)second, (long)(second - (int)second) * 1000000};
+
+  struct timeval tv = {(long)second, (long)((second - (int)second) * 1000000)};
   int *idx = detail::timerFuncs.nextIdx();
   struct event *ev = event_new(base_, -1, once ? 0 : EV_PERSIST, timerCb, idx);
   detail::timerFuncs.addCb(cb, ev,*idx);
-
   evtimer_add(ev, &tv);
   return *idx;
 }
