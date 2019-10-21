@@ -1,5 +1,5 @@
-#ifndef TANK_NET_NETWORKMANAGER_H
-#define TANK_NET_NETWORKMANAGER_H
+#ifndef TANK_BASE_NETWORKMANAGER_H
+#define TANK_BASE_NETWORKMANAGER_H
 
 #include <event2/event.h>
 #include <event2/listener.h>

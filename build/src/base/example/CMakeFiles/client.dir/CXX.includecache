@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/envy/tank/src/base/example/client.cc
+arpa/inet.h
+-
+string.h
+-
+assert.h
+-
+unistd.h
+-
+string
+-
+

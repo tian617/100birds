@@ -1,0 +1,9 @@
+/home/envy/tank/build/CMakeFiles/rebuild_cache.dir
+/home/envy/tank/build/CMakeFiles/edit_cache.dir
+/home/envy/tank/build/src/base/CMakeFiles/rebuild_cache.dir
+/home/envy/tank/build/src/base/CMakeFiles/base_lib.dir
+/home/envy/tank/build/src/base/CMakeFiles/edit_cache.dir
+/home/envy/tank/build/src/base/example/CMakeFiles/edit_cache.dir
+/home/envy/tank/build/src/base/example/CMakeFiles/client.dir
+/home/envy/tank/build/src/base/example/CMakeFiles/rebuild_cache.dir
+/home/envy/tank/build/src/base/example/CMakeFiles/server.dir

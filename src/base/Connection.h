@@ -1,5 +1,5 @@
-#ifndef TANK_NET_CONNECTION_H
-#define TANK_NET_CONNECTION_H
+#ifndef TANK_BASE_CONNECTION_H
+#define TANK_BASE_CONNECTION_H
 
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
@@ -19,6 +19,7 @@ public:
 
   void setCallbacks(MessageCallback msgCb, CloseCallback closeCb);
 
+  // fix:should not expose
   const MessageCallback &msgcb();
 
   void close() const;
