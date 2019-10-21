@@ -1,2 +1,0 @@
-/usr/bin/ar qc libbase_lib.a  CMakeFiles/base_lib.dir/Connection.cc.o CMakeFiles/base_lib.dir/NetworkManager.cc.o CMakeFiles/base_lib.dir/Timer.cc.o
-/usr/bin/ranlib libbase_lib.a
