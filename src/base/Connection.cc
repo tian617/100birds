@@ -52,7 +52,8 @@ void eventCallback(struct bufferevent *bev, short events, void *conn)
 
 typedef Connection::MessageCallback MessageCallback;
 Connection::Connection(struct event_base *base, evutil_socket_t fd)
-    : bev_(NULL)
+    : bev_(NULL),
+      alive_(true)
 {
   setName(fd);
   bev_ = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
@@ -72,10 +73,11 @@ const MessageCallback &Connection::msgcb()
   return msgCb_;
 }
 
-void Connection::close() const
+void Connection::close()
 {
   assert(closeCb_);
   closeCb_();
+  alive_ = false;
 }
 
 void Connection::send(const char *data, int len) const
@@ -112,4 +114,9 @@ void Connection::setName(int fd)
   socklen_t len = sizeof(sin);
   getpeername(fd, reinterpret_cast<sockaddr *>(&sin), &len);
   name_ = std::string(inet_ntoa(sin.sin_addr)) + ":" + std::to_string(ntohs(sin.sin_port));
+}
+
+bool Connection::alive() const
+{
+  return alive_;
 }

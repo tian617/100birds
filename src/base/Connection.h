@@ -22,7 +22,7 @@ public:
   // fix:should not expose
   const MessageCallback &msgcb();
 
-  void close() const;
+  void close();
 
   void send(const char *data, int len) const;
 
@@ -34,9 +34,12 @@ public:
 
   std::weak_ptr<const Connection> getWeak() const;
 
+  bool alive() const;
+
 private:
   void setName(int fd);
 
+  bool alive_;
   CloseCallback closeCb_;
   MessageCallback msgCb_;
   struct bufferevent *bev_;
@@ -44,5 +47,6 @@ private:
 };
 
 typedef std::weak_ptr<const Connection> ConnectionWeak;
+typedef std::shared_ptr<const Connection> ConnectionPtr;
 
 #endif
