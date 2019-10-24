@@ -47,6 +47,6 @@ private:
 };
 
 typedef std::weak_ptr<const Connection> ConnectionWeak;
-typedef std::shared_ptr<const Connection> ConnectionPtr;
+typedef std::shared_ptr<Connection> ConnectionPtr;
 
 #endif

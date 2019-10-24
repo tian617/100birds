@@ -5,7 +5,6 @@
 #include <string.h>
 
 using std::placeholders::_1;
-typedef NetworkManager::ConnectionPtr ConnectionPtr;
 typedef NetworkManager::MessageCallback MessageCallback;
 typedef std::function<void(const ConnectionPtr &conn)> AddCallback;
 
