@@ -8,7 +8,7 @@
 int main()
 {
   NetworkManager net("127.0.0.1", 7777);
-  BattleRoom room(2);
+  BattleRoom room(1);
   net.setConnectionCallback([&](const Connection *conn) {
     room.addPlayer(Player(conn));
   });

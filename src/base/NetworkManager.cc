@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <string.h>
+#include <signal.h>
 
 using std::placeholders::_1;
 typedef NetworkManager::MessageCallback MessageCallback;
@@ -30,6 +31,7 @@ void acceptCallback(struct evconnlistener *listener,
                     evutil_socket_t fd, struct sockaddr *address, int socklen,
                     void *ctx)
 {
+  signal(SIGPIPE,SIG_IGN); // avoid exist when twice close conn
   struct event_base *base = evconnlistener_get_base(listener);
   assert(base);
   ConnectionPtr conn(new Connection(base, fd));

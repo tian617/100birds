@@ -24,6 +24,7 @@ void BattleRoom::addPlayer(const Player &player)
 
 void BattleRoom::dealTurn()
 {
+  printf("deal turn=--------------------%ld\n",commands_.size());
   std::vector<int> delPlayerIdxs;
   for (int i = 0; i < commands_.size(); i++)
   {
