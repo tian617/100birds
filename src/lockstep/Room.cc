@@ -1,12 +1,12 @@
-#include "BattleRoom.h"
+#include "Room.h"
 
-void BattleRoom::addCommand(const std::string &msg)
+void Room::addCommand(const std::string &msg)
 {
   printf("log msg:%s\n", msg.c_str());
   commands_.push_back(std::move(msg));
 }
 
-void BattleRoom::addPlayer(const Player &player)
+void Room::addPlayer(const Player &player)
 {
   players_.push_back(player);
   if (players_.size() == count_)
@@ -22,7 +22,7 @@ void BattleRoom::addPlayer(const Player &player)
   }
 }
 
-void BattleRoom::dealTurn()
+void Room::dealTurn()
 {
   printf("deal turn=--------------------%ld\n",commands_.size());
   std::vector<int> delPlayerIdxs;

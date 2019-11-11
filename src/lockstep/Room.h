@@ -7,12 +7,13 @@
 #include "src/base/Timer.h"
 #include "Player.h"
 
-class BattleRoom
+class Room
 {
   typedef long ID;
 
 public:
-  BattleRoom(int count)
+  Room(){}
+  Room(int count)
       : count_(count)
   {
   }
