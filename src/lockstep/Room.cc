@@ -1,50 +1,81 @@
 #include "Room.h"
 
-void Room::addCommand(const std::string &msg)
+Room::Room()
+    : curWaitBeginRoomId(1),
+      rooms_(),
+      roomCommands_(),
+      roomPlayersCount_()
 {
-  printf("log msg:%s\n", msg.c_str());
-  commands_.push_back(std::move(msg));
 }
 
-void Room::addPlayer(const Player &player)
+void Room::addPlayer(PlayerPtr player)
 {
-  players_.push_back(player);
-  if (players_.size() == count_)
+  printf("0");
+
+  // means replay
+  if (player->roomId() > 0)
   {
-    if (commands_.size() == count_)
+    checkPrevious(player->roomId());
+  }
+
+  if (rooms_[curWaitBeginRoomId].size() == 0)
+  {
+    roomCommands_[curWaitBeginRoomId] = std::string("taps:");
+    roomCommands_[curWaitBeginRoomId].reserve(1024);
+    // roomPlayersCount_[curWaitBeginRoomId] = 0;
+    Timer::instance()->runAfter(std::bind(&Room::beginGame, this), kWaitTime);
+  }
+  roomPlayersCount_[curWaitBeginRoomId]++;
+
+  // single thread not need lock
+  player->setRoomId(curWaitBeginRoomId);
+  rooms_[curWaitBeginRoomId].push_back(player);
+  player->setPlayerInRoomId(rooms_[curWaitBeginRoomId].size());
+  player->sendmsg(std::to_string(rooms_[curWaitBeginRoomId].size()));
+  std::string newPlayerBroadcast = "new:" + std::to_string(player->playerInRoomId()) + "," + "type";
+  for (auto &roomPlayer : rooms_[curWaitBeginRoomId])
+  {
+    if (player->playerInRoomId() == roomPlayer->playerInRoomId())
     {
-      dealTurn();
+      continue;
     }
-    Timer::instance()->runEvery([&]() {
-      dealTurn();
-    },
-                                0.1f);
+    roomPlayer->sendmsg(newPlayerBroadcast);
   }
 }
 
-void Room::dealTurn()
+void Room::beginGame()
 {
-  printf("deal turn=--------------------%ld\n",commands_.size());
-  std::vector<int> delPlayerIdxs;
-  for (int i = 0; i < commands_.size(); i++)
+  for (auto &player : rooms_[curWaitBeginRoomId])
   {
-    for (int j = 0; j < players_.size(); j++)
-    {
-      if (players_[j].connected())
-      {
-        players_[j].sendmsg(commands_[i]);
-      }
-      else
-      {
-        delPlayerIdxs.push_back(i);
-      }
-    }
-
-    for (int i = delPlayerIdxs.size() - 1; i >= 0; i--)
-    {
-      players_.erase(players_.begin() + i);
-      //todo: broadcast del msg
-    }
+    player->sendmsg("start");
   }
-  commands_.clear();
+  Timer::instance()->runEvery(std::bind(&Room::dealTurn, this, curWaitBeginRoomId), tick_);
+  curWaitBeginRoomId++;
+}
+
+void Room::addCommand(PlayerPtr player, const char *data)
+{
+  printf("log msg:%s\n", data);
+  std::string command = roomCommands_[curWaitBeginRoomId];
+  command.insert(command.size(), data);
+  command.insert(command.size(), ",");
+}
+
+void Room::dealTurn(long roomId)
+{
+  for (auto &player : rooms_[roomId])
+  {
+    player->sendmsg(roomCommands_[roomId]);
+  }
+  roomCommands_[roomId].clear();
+}
+
+void Room::checkPrevious(long roomId)
+{
+  if (--roomPlayersCount_[roomId] == 0)
+  {
+    rooms_.erase(roomId);
+    roomCommands_.erase(roomId);
+    roomPlayersCount_.erase(roomId);
+  }
 }

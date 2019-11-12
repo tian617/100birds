@@ -10,21 +10,27 @@
 class Room
 {
   typedef long ID;
+  typedef std::shared_ptr<Player> PlayerPtr;
 
 public:
-  Room(){}
-  Room(int count)
-      : count_(count)
-  {
-  }
-  void addCommand(const std::string &msg);
-  void addPlayer(const Player &player);
-  void dealTurn();
+  Room();
+  void addCommand(PlayerPtr player, const char *data);
+  void addPlayer(PlayerPtr player);
 
 private:
-  int count_;
-  std::vector<Player> players_;
-  std::vector<std::string> commands_;
+  const int kRoomLimit = 64;
+  const float kWaitTime = 10.0f;
+  const float tick_ = 1 / 30.0f;
+
+  void beginGame();
+  void dealTurn(long roomId);
+  void checkPrevious(long roomId);
+
+  long curWaitBeginRoomId;
+  std::unordered_map<long, std::vector<PlayerPtr>> rooms_;
+  std::unordered_map<long, std::string> roomCommands_;
+  // when player add to other room, not delete from previous room, but reduce room count
+  std::unordered_map<long,int> roomPlayersCount_; 
 };
 
 #endif

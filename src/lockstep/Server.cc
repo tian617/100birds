@@ -1,34 +1,53 @@
 #include "Server.h"
 #include <functional>
+#include <cstring>
+#include <assert.h>
 
-using std::placeholders::_1;
+using namespace std::placeholders;
 
 Server::Server(const std::string &ip, int port)
     : net_(new NetworkManager(ip, port)),
-      room_()
+      room_(new Room())
 {
-  net_->setConnectionCallback(std::bind(&Server::onConnect,this,_1));
+  net_->setConnectionCallback(std::bind(&Server::onConnect, this, _1));
+  net_->setMessageCallback(std::bind(&Server::onMessage, this, _1, _2));
 }
 
+// connect meaes click play button
 void Server::onConnect(const Connection *conn)
 {
-  conn->send("OK");
-  room_->addPlayer(Player(conn));
+  printf("new client:%s\n", conn->name().c_str());
+  std::shared_ptr<Player> player = std::make_shared<Player>(conn);
+  player->sendmsg("OK");
+  room_->addPlayer(player);
+  players_[conn] = player;
 }
 
-// 在房间有指定人数时，构造一条生成tank的命令
-// int main()
-// {
-//   NetworkManager net("127.0.0.1", 7777);
-//   BattleRoom room(1);
-//   net.setConnectionCallback([&](const Connection *conn) {
-//     room.addPlayer(Player(conn));
-//   });
+void Server::onMessage(const Connection *conn, const char *data)
+{
+  printf("onMsg\n");
+  const char *p = strchr(data, ':');
+  if (p == nullptr) // play or heartbeat
+  {
+    if (strcmp(data, "play") == 0)
+    {
+      // play button
+      room_->addPlayer(players_[conn]);
+    }
+    else if (strcmp(data, "heartbeat") == 0)
+    {
+      // heartbeat msg
+    }
+  }
+  else
+  {
+    assert(strncmp(data, "tap", 3) == 0);
+    room_->addCommand(players_[conn], data + 4);
+  }
+}
 
-//   net.setMessageCallback([&](const Connection *conn, const char *data) {
-//     printf("--");
-//     room.addCommand(data);
-//   });
-
-//   net.start();
-// }
+void Server::run() const
+{
+  printf("server run...\n");
+  net_->start();
+}
