@@ -14,16 +14,16 @@ class Callbacks
 public:
   Callbacks() : funcs_(), availableIdxs_() {}
 
-  void addCb(ExpiredCallback cb, struct event *ev,int idx)
+  void addCb(ExpiredCallback cb, struct event *ev, int idx)
   {
     Func func(cb, ev);
-    if(idx<funcs_.size())
+    if (idx < funcs_.size())
     {
-      funcs_[idx]=std::move(func);
+      funcs_[idx] = std::move(func);
     }
     else
     {
-      funcs_.push_back(std::move(func));     
+      funcs_.push_back(std::move(func));
     }
   }
 
@@ -34,16 +34,16 @@ public:
     availableIdxs_.push(idx);
   }
 
-  int* nextIdx()
+  int *nextIdx()
   {
-    if(availableIdxs_.empty())
+    if (availableIdxs_.empty())
     {
       idxs_.emplace_back(new int(idxs_.size()));
       return idxs_.back().get();
     }
     else
     {
-      int idx=availableIdxs_.front();
+      int idx = availableIdxs_.front();
       availableIdxs_.pop();
       return idxs_[idx].get();
     }
@@ -57,7 +57,7 @@ public:
 private:
   std::vector<Func> funcs_;
   std::queue<int> availableIdxs_;
-  std::vector<std::unique_ptr<int>> idxs_;  // save alloc int of index
+  std::vector<std::unique_ptr<int>> idxs_; // save alloc int of index
 } timerFuncs;
 } // namespace detail
 
@@ -77,7 +77,7 @@ int Timer::setCb(ExpiredCallback cb, float second, bool once)
   struct timeval tv = {(long)second, (long)((second - (int)second) * 1000000)};
   int *idx = detail::timerFuncs.nextIdx();
   struct event *ev = event_new(base_, -1, once ? 0 : EV_PERSIST, timerCb, idx);
-  detail::timerFuncs.addCb(cb, ev,*idx);
+  detail::timerFuncs.addCb(cb, ev, *idx);
   evtimer_add(ev, &tv);
   return *idx;
 }

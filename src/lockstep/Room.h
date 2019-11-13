@@ -18,8 +18,8 @@ public:
   void addPlayer(PlayerPtr player);
 
 private:
-  const int kRoomLimit = 64;
-  const float kWaitTime = 10.0f;
+  const int kRoomLimit_ = 64;
+  const float kWaitTime_ = 3.0f;
   const float tick_ = 1 / 30.0f;
 
   void beginGame();
