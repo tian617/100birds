@@ -25,7 +25,6 @@ void Server::onConnect(const Connection *conn)
 
 void Server::onMessage(const Connection *conn, const char *data)
 {
-  printf("onMsg\n");
   const char *p = strchr(data, ':');
   if (p == nullptr) // play or heartbeat
   {

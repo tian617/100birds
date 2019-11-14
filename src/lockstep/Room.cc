@@ -49,16 +49,17 @@ void Room::beginGame()
     printf("send\n");
     player->sendmsg("other:start");
   }
-  // Timer::instance()->runEvery(std::bind(&Room::dealTurn, this, curWaitBeginRoomId), tick_);
+  Timer::instance()->runEvery(std::bind(&Room::dealTurn, this, curWaitBeginRoomId), tick_);
   curWaitBeginRoomId++;
 }
 
 void Room::addCommand(PlayerPtr player, const char *data)
 {
   printf("log msg:%s\n", data);
-  std::string command = roomCommands_[curWaitBeginRoomId];
+  std::string command = roomCommands_[player->roomId()];
   command.insert(command.size(), data);
   command.insert(command.size(), ",");
+  roomCommands_[player->roomId()] = command;
 }
 
 void Room::dealTurn(long roomId)
