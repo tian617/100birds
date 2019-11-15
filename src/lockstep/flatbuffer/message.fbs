@@ -6,8 +6,8 @@ namespace FlappyBird;
 // Tap: 玩家操作  --from client
 // Turn: lockstep数据  --from server
 // Heartbe: 心跳包  --from client & server
-union Type {Play,SelfInfo,Start,Tap,Turn,Heartbeat}
-union BirdType {Red,Yellow}
+enum Type:byte {Play,SelfInfo,Start,Tap,Turn,Heartbeat}
+enum BirdType:byte {Red,Yellow}
 table BirdInfo{
   id:uint8;
   birdType:BirdType;
