@@ -1,0 +1,25 @@
+namespace FlappyBird;
+
+// Play：玩家点Play/Replay  --from client
+// SelfInfo: 服务器返回玩家等待游戏开始时的数据  --from server
+// Start: 游戏开始时初始化消息  --from server
+// Tap: 玩家操作  --from client
+// Turn: lockstep数据  --from server
+// Heartbe: 心跳包  --from client & server
+union Type {Play,SelfInfo,Start,Tap,Turn,Heartbeat}
+union BirdType {Red,Yellow}
+table BirdInfo{
+  id:uint8;
+  birdType:BirdType;
+}
+
+table Message{
+  type:Type;
+  birdType:BirdType; //Play
+  id:uint8;  // SelfInfo & Tap
+  timeWaiting:float; // SelfInfo
+  birds:[BirdInfo]; // Start
+  ids:[uint8];  // Turn
+}
+
+root_type Message;
