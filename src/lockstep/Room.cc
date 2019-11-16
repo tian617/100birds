@@ -1,83 +1,82 @@
 #include "Room.h"
 
-Room::Room()
-    : curWaitBeginRoomId(1),
-      rooms_(),
-      roomCommands_(),
-      roomPlayersCount_()
+// Room::Room()
+//     : curWaitBeginRoomId(1),
+//       rooms_(),
+//       roomCommands_(),
+//       roomPlayersCount_()
+// {
+// }
+
+Room::Room(int id)
+    : id_(id),
+      players_(),
+      birds_()
 {
+  Timer::instance()->runAfter(std::bind(&Room::gameStart, this), kWaitTime_);
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  initTime_ = tv.tv_sec * kSecToUsec + tv.tv_usec;
+}
+
+void Room::addTap(uint8_t id)
+{
+  taps_.push_back(id);
 }
 
 void Room::addPlayer(PlayerPtr player)
 {
-  // means replay
-  if (player->roomId() > 0)
-  {
-    checkPrevious(player->roomId());
-  }
-
-  if (rooms_[curWaitBeginRoomId].size() == 0)
-  {
-    roomCommands_[curWaitBeginRoomId] = std::string("taps:");
-    roomCommands_[curWaitBeginRoomId].reserve(1024);
-    // roomPlayersCount_[curWaitBeginRoomId] = 0;
-    Timer::instance()->runAfter(std::bind(&Room::beginGame, this), kWaitTime_);
-  }
-  roomPlayersCount_[curWaitBeginRoomId]++;
-
-  // single thread not need lock
-  player->setRoomId(curWaitBeginRoomId);
-  rooms_[curWaitBeginRoomId].push_back(player);
-  player->setPlayerInRoomId(rooms_[curWaitBeginRoomId].size());
-  player->sendmsg("self:" + std::to_string(rooms_[curWaitBeginRoomId].size()));
-  std::string newPlayerBroadcast = "new:" + std::to_string(player->playerInRoomId()) + "," + "type";
-  for (auto &roomPlayer : rooms_[curWaitBeginRoomId])
-  {
-    if (player->playerInRoomId() == roomPlayer->playerInRoomId())
-    {
-      continue;
-    }
-    roomPlayer->sendmsg(newPlayerBroadcast);
-  }
+  flatbuffers::FlatBufferBuilder builder(1024);
+  int playId = players_.size();
+  auto info = CreateBirdInfo(builder, playId, player->getBirdType());
+  birds_.push_back(std::move(info));
+  builder.Clear();
+  MessageBuilder message(builder);
+  message.add_id(playId);
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  long int now = tv.tv_sec * kSecToUsec + tv.tv_usec;
+  message.add_timeWaiting(kWaitTime_ - (now - initTime_) / (float)kSecToUsec);
+  message.Finish();
+  player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
+  players_.insert(player);
 }
 
-void Room::beginGame()
+void Room::removePlayer(PlayerPtr player)
 {
-  printf("begin\n");
-  for (auto &player : rooms_[curWaitBeginRoomId])
-  {
-    printf("send\n");
-    player->sendmsg("other:start");
-  }
-  Timer::instance()->runEvery(std::bind(&Room::dealTurn, this, curWaitBeginRoomId), tick_);
-  curWaitBeginRoomId++;
+  players_.erase(player);
 }
 
-void Room::addCommand(PlayerPtr player, const char *data)
+int Room::playerCount() const
 {
-  printf("log msg:%s\n", data);
-  std::string command = roomCommands_[player->roomId()];
-  command.insert(command.size(), data);
-  command.insert(command.size(), ",");
-  roomCommands_[player->roomId()] = command;
+  return players_.size();
 }
 
-void Room::dealTurn(long roomId)
+void Room::gameStart()
 {
-  for (auto &player : rooms_[roomId])
+  if (players_.size() == 0)
+    return;
+  flatbuffers::FlatBufferBuilder builder(1024);
+  MessageBuilder message(builder);
+  message.add_type(Type_Start);
+  message.add_birds(builder.CreateVector(birds_));
+  message.Finish();
+  for (auto &player : players_)
   {
-    player->sendmsg(roomCommands_[roomId]);
+    player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
   }
-  roomCommands_[roomId].clear();
-  roomCommands_[roomId].insert(0, "taps:");
+  Timer::instance()->runEvery(std::bind(&Room::turn, this), tick_);
 }
 
-void Room::checkPrevious(long roomId)
+void Room::turn()
 {
-  if (--roomPlayersCount_[roomId] == 0)
+  flatbuffers::FlatBufferBuilder builder(1024);
+  MessageBuilder message(builder);
+  message.add_ids(builder.CreateVector(taps_));
+  message.Finish();
+  for (auto &player : players_)
   {
-    rooms_.erase(roomId);
-    roomCommands_.erase(roomId);
-    roomPlayersCount_.erase(roomId);
+    player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
   }
+  taps_.clear();
 }

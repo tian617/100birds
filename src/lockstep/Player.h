@@ -4,26 +4,29 @@
 #include <memory>
 #include <string>
 #include "src/base/Connection.h"
+#include "flatbuffers/message_generated.h"
 
 class Player
 {
 public:
   Player(const Connection *connect)
       : conn_(connect),
-        playerInRoomId_(-1),
+        id_(-1),
         roomId_(-1),
         tap_(false)
   {
   }
+
+  Player(const Connection *conn, BirdType type);
 
   long roomId() const
   {
     return roomId_;
   }
 
-  int playerInRoomId() const
+  uint8_t id() const
   {
-    return playerInRoomId_;
+    return id_;
   }
 
   void setRoomId(long id)
@@ -31,9 +34,9 @@ public:
     roomId_ = id;
   }
 
-  void setPlayerInRoomId(int id)
+  void setId(uint8_t id)
   {
-    playerInRoomId_ = id;
+    id_ = id;
   }
 
   void setTap(bool tap)
@@ -51,11 +54,23 @@ public:
     conn_->send(msg);
   }
 
+  void sendmsg(const void *msg, size_t len) const
+  {
+    conn_->send(msg, len);
+  }
+
+  BirdType getBirdType() const
+  {
+    return type_;
+  }
+
 private:
   const Connection *conn_;
-  int playerInRoomId_;
+
+  uint8_t id_;
   long roomId_;
   bool tap_;
+  BirdType type_;
 };
 
 #endif

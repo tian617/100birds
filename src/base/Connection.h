@@ -24,7 +24,7 @@ public:
 
   void close();
 
-  void send(const char *data, int len) const;
+  void send(const void *data, int len) const;
 
   void send(const char *data) const;
 

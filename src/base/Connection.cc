@@ -80,7 +80,7 @@ void Connection::close()
   alive_ = false;
 }
 
-void Connection::send(const char *data, int len) const
+void Connection::send(const void *data, int len) const
 {
   struct evbuffer *evbuf = evbuffer_new();
   evbuffer_add(evbuf, &len, EvbufferHeadLength);

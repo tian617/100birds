@@ -2,35 +2,41 @@
 #define TANK_BATTLEROOM_H
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <unordered_map>
+#include <time.h>
 #include "src/base/Timer.h"
 #include "Player.h"
+#include "flatbuffers/message_generated.h"
 
+using namespace FlappyBird;
 class Room
 {
   typedef long ID;
   typedef std::shared_ptr<Player> PlayerPtr;
 
 public:
-  Room();
-  void addCommand(PlayerPtr player, const char *data);
+  Room(int id);
+  void addTap(uint8_t id);
   void addPlayer(PlayerPtr player);
+  void removePlayer(PlayerPtr player);
+  int playerCount() const;
 
 private:
   const int kRoomLimit_ = 64;
   const float kWaitTime_ = 3.0f;
   const float tick_ = 1 / 30.0f;
+  const int kSecToUsec = 1000 * 1000;
 
-  void beginGame();
-  void dealTurn(long roomId);
-  void checkPrevious(long roomId);
+  void turn();
+  void gameStart();
 
-  long curWaitBeginRoomId;
-  std::unordered_map<long, std::vector<PlayerPtr>> rooms_;
-  std::unordered_map<long, std::string> roomCommands_;
-  // when player add to other room, not delete from previous room, but reduce room count
-  std::unordered_map<long,int> roomPlayersCount_; 
+  int id_;
+  long int initTime_;
+  std::vector<uint8_t> taps_;
+  std::unordered_set<PlayerPtr> players_;
+  std::vector<flatbuffers::Offset<FlappyBird::BirdInfo>> birds_;
 };
 
 #endif

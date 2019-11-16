@@ -4,7 +4,7 @@
 #ifndef FLATBUFFERS_GENERATED_MESSAGE_FLAPPYBIRD_H_
 #define FLATBUFFERS_GENERATED_MESSAGE_FLAPPYBIRD_H_
 
-#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers.h"
 
 namespace FlappyBird {
 
