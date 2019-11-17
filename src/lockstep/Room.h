@@ -22,6 +22,7 @@ public:
   void addPlayer(PlayerPtr player);
   void removePlayer(PlayerPtr player);
   int playerCount() const;
+  bool isStart() const;
 
 private:
   const int kRoomLimit_ = 64;
@@ -32,11 +33,13 @@ private:
   void turn();
   void gameStart();
 
+  bool start_;
   int id_;
   long int initTime_;
+  int taskStart_;
   std::vector<uint8_t> taps_;
   std::unordered_set<PlayerPtr> players_;
-  std::vector<flatbuffers::Offset<FlappyBird::BirdInfo>> birds_;
+  std::unordered_map<uint8_t,BirdType> birds_;
 };
 
 #endif

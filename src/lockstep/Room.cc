@@ -1,19 +1,12 @@
 #include "Room.h"
 
-// Room::Room()
-//     : curWaitBeginRoomId(1),
-//       rooms_(),
-//       roomCommands_(),
-//       roomPlayersCount_()
-// {
-// }
-
 Room::Room(int id)
-    : id_(id),
+    : start_(false),
+      id_(id),
       players_(),
       birds_()
 {
-  Timer::instance()->runAfter(std::bind(&Room::gameStart, this), kWaitTime_);
+  taskStart_ = Timer::instance()->runAfter(std::bind(&Room::gameStart, this), kWaitTime_);
   struct timeval tv;
   gettimeofday(&tv, nullptr);
   initTime_ = tv.tv_sec * kSecToUsec + tv.tv_usec;
@@ -28,18 +21,26 @@ void Room::addPlayer(PlayerPtr player)
 {
   flatbuffers::FlatBufferBuilder builder(1024);
   int playId = players_.size();
-  auto info = CreateBirdInfo(builder, playId, player->getBirdType());
-  birds_.push_back(std::move(info));
-  builder.Clear();
+  birds_[playId] = player->getBirdType();
   MessageBuilder message(builder);
   message.add_id(playId);
   struct timeval tv;
   gettimeofday(&tv, nullptr);
   long int now = tv.tv_sec * kSecToUsec + tv.tv_usec;
   message.add_timeWaiting(kWaitTime_ - (now - initTime_) / (float)kSecToUsec);
-  message.Finish();
+  auto msg = message.Finish();
+  builder.Finish(msg);
+
   player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
   players_.insert(player);
+  printf("--%d\n", builder.GetSize());
+
+  if (playId == kRoomLimit_)
+  {
+    printf("cancel task\n");
+    Timer::instance()->cancel(taskStart_);
+    gameStart();
+  }
 }
 
 void Room::removePlayer(PlayerPtr player)
@@ -52,15 +53,30 @@ int Room::playerCount() const
   return players_.size();
 }
 
+bool Room::isStart() const
+{
+  return start_;
+}
+
+// tofix
 void Room::gameStart()
 {
+  printf("room start\n");
+  start_ = true;
   if (players_.size() == 0)
     return;
   flatbuffers::FlatBufferBuilder builder(1024);
+  std::vector<flatbuffers::Offset<BirdInfo>> birdInfos;
+  for (auto &bird : birds_)
+  {
+    birdInfos.push_back(CreateBirdInfo(builder, bird.first, bird.second));
+  }
+  auto birds = builder.CreateVector(birdInfos);
   MessageBuilder message(builder);
   message.add_type(Type_Start);
-  message.add_birds(builder.CreateVector(birds_));
-  message.Finish();
+  message.add_birds(birds);
+  auto msg = message.Finish();
+  builder.Finish(msg);
   for (auto &player : players_)
   {
     player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
@@ -71,9 +87,11 @@ void Room::gameStart()
 void Room::turn()
 {
   flatbuffers::FlatBufferBuilder builder(1024);
+  auto taps = builder.CreateVector(taps_);
   MessageBuilder message(builder);
-  message.add_ids(builder.CreateVector(taps_));
-  message.Finish();
+  message.add_ids(taps);
+  auto msg = message.Finish();
+  builder.Finish(msg);
   for (auto &player : players_)
   {
     player->sendmsg(builder.GetBufferPointer(), builder.GetSize());

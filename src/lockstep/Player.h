@@ -6,6 +6,7 @@
 #include "src/base/Connection.h"
 #include "flatbuffers/message_generated.h"
 
+using namespace FlappyBird;
 class Player
 {
 public:
@@ -16,8 +17,6 @@ public:
         tap_(false)
   {
   }
-
-  Player(const Connection *conn, BirdType type);
 
   long roomId() const
   {
@@ -57,6 +56,11 @@ public:
   void sendmsg(const void *msg, size_t len) const
   {
     conn_->send(msg, len);
+  }
+
+  void setBirdType(BirdType type)
+  {
+    type_ = type;
   }
 
   BirdType getBirdType() const

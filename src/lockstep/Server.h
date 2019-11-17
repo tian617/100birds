@@ -18,10 +18,16 @@ public:
 private:
   void onConnect(const Connection *conn);
   void onMessage(const Connection *conn, const char *data);
-  
+  void removePlayerInRoom(long roomId,const std::shared_ptr<Player>& player);
+  void playMsg(std::shared_ptr<Player> player);
+  void tapMsg(std::shared_ptr<Player> player, uint8_t id);
+  void heartbeatMsg(std::shared_ptr<Player> player);
+
+
+  long curWaitingRoom_;
   std::unique_ptr<NetworkManager> net_;
-  std::unique_ptr<Room> room_;
-  std::unordered_map<const Connection*,std::shared_ptr<Player>> players_;
+  std::unordered_map<long, std::unique_ptr<Room>> rooms_;
+  std::unordered_map<const Connection *, std::shared_ptr<Player>> players_;
 };
 
 #endif
