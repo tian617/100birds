@@ -10,7 +10,7 @@ typedef NetworkManager::MessageCallback MessageCallback;
 typedef std::function<void(const ConnectionPtr &conn)> AddCallback;
 
 typedef std::weak_ptr<Connection> ConnectionWeakPtr;
-typedef std::function<void(const ConnectionWeakPtr& connPtr)> CloseCallback;
+typedef std::function<void(const ConnectionWeakPtr &connPtr)> CloseCallback;
 
 namespace detail
 {
@@ -20,9 +20,9 @@ struct CallBack
   CloseCallback closeCb_;
   MessageCallback messageCb_;
 
-  void msgHandler(const Connection* conn, const char *data)
+  void msgHandler(const Connection *conn, const char *data)
   {
-     messageCb_(conn, data);
+    messageCb_(conn, data);
   }
 } cb;
 } // namespace detail
@@ -31,12 +31,12 @@ void acceptCallback(struct evconnlistener *listener,
                     evutil_socket_t fd, struct sockaddr *address, int socklen,
                     void *ctx)
 {
-  signal(SIGPIPE,SIG_IGN); // avoid exist when twice close conn
+  signal(SIGPIPE, SIG_IGN); // avoid exist when twice close conn
   struct event_base *base = evconnlistener_get_base(listener);
   assert(base);
   ConnectionPtr conn(new Connection(base, fd));
-  ConnectionWeakPtr cwp=conn;
-  Connection *c=conn.get();
+  ConnectionWeakPtr cwp = conn;
+  Connection *c = conn.get();
   conn->setCallbacks(std::bind(&detail::CallBack::msgHandler, &detail::cb, c, _1),
                      [=]() { detail::cb.closeCb_(cwp); });
   detail::cb.addCb_(conn);
@@ -56,7 +56,7 @@ NetworkManager::NetworkManager(std::string ip, int port)
       connects_()
 {
   Timer::init(base_);
-  
+
   struct sockaddr_in sin;
   memset(&sin, 0, sizeof(sin));
   sin.sin_family = AF_INET;
@@ -68,8 +68,7 @@ NetworkManager::NetworkManager(std::string ip, int port)
                                                             reinterpret_cast<sockaddr *>(&sin), sizeof(sin));
   evconnlistener_set_error_cb(listener, acceptErrorCallback);
 
-  detail::cb.closeCb_ = [&](const ConnectionWeakPtr& conn) {
-    printf("close client: %s\n", conn.lock()->name().c_str());
+  detail::cb.closeCb_ = [&](const ConnectionWeakPtr &conn) {
     connects_.erase(conn.lock());
   };
 }
@@ -85,6 +84,14 @@ void NetworkManager::setConnectionCallback(ConnectionCallback &&cb)
 void NetworkManager::setMessageCallback(MessageCallback &&cb)
 {
   detail::cb.messageCb_ = std::move(cb);
+}
+
+void NetworkManager::setDisConnectCallback(DisConnectCallback &&cb)
+{
+   detail::cb.closeCb_ = [=](const ConnectionWeakPtr &conn) {
+    cb(conn.lock().get());
+    connects_.erase(conn.lock());
+  };
 }
 
 void NetworkManager::start() const

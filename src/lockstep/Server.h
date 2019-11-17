@@ -18,6 +18,7 @@ public:
 private:
   void onConnect(const Connection *conn);
   void onMessage(const Connection *conn, const char *data);
+  void onDisConnect(const Connection *conn);
   void removePlayerInRoom(long roomId,const std::shared_ptr<Player>& player);
   void playMsg(std::shared_ptr<Player> player);
   void tapMsg(std::shared_ptr<Player> player, uint8_t id);

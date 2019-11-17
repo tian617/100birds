@@ -23,6 +23,7 @@ void Room::addPlayer(PlayerPtr player)
   int playId = players_.size();
   birds_[playId] = player->getBirdType();
   MessageBuilder message(builder);
+  message.add_type(Type_SelfInfo);
   message.add_id(playId);
   struct timeval tv;
   gettimeofday(&tv, nullptr);
@@ -33,7 +34,6 @@ void Room::addPlayer(PlayerPtr player)
 
   player->sendmsg(builder.GetBufferPointer(), builder.GetSize());
   players_.insert(player);
-  printf("--%d\n", builder.GetSize());
 
   if (playId == kRoomLimit_)
   {
@@ -89,6 +89,7 @@ void Room::turn()
   flatbuffers::FlatBufferBuilder builder(1024);
   auto taps = builder.CreateVector(taps_);
   MessageBuilder message(builder);
+  message.add_type(Type_Turn);
   message.add_ids(taps);
   auto msg = message.Finish();
   builder.Finish(msg);
