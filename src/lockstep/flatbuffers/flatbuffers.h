@@ -17,7 +17,7 @@
 #ifndef FLATBUFFERS_H_
 #define FLATBUFFERS_H_
 
-#include "base.h"
+#include "flatbuffers/base.h"
 
 #if defined(FLATBUFFERS_NAN_DEFAULTS)
 #  include <cmath>

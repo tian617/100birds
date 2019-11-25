@@ -4,7 +4,7 @@
 #ifndef FLATBUFFERS_GENERATED_MESSAGE_FLAPPYBIRD_H_
 #define FLATBUFFERS_GENERATED_MESSAGE_FLAPPYBIRD_H_
 
-#include "flatbuffers.h"
+#include "flatbuffers/flatbuffers.h"
 
 namespace FlappyBird {
 
@@ -57,29 +57,35 @@ inline const char *EnumNameType(Type e) {
 enum BirdType {
   BirdType_Red = 0,
   BirdType_Yellow = 1,
+  BirdType_Blue = 2,
+  BirdType_Num = 3,
   BirdType_MIN = BirdType_Red,
-  BirdType_MAX = BirdType_Yellow
+  BirdType_MAX = BirdType_Num
 };
 
-inline const BirdType (&EnumValuesBirdType())[2] {
+inline const BirdType (&EnumValuesBirdType())[4] {
   static const BirdType values[] = {
     BirdType_Red,
-    BirdType_Yellow
+    BirdType_Yellow,
+    BirdType_Blue,
+    BirdType_Num
   };
   return values;
 }
 
 inline const char * const *EnumNamesBirdType() {
-  static const char * const names[3] = {
+  static const char * const names[5] = {
     "Red",
     "Yellow",
+    "Blue",
+    "Num",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameBirdType(BirdType e) {
-  if (e < BirdType_Red || e > BirdType_Yellow) return "";
+  if (e < BirdType_Red || e > BirdType_Num) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesBirdType()[index];
 }
@@ -141,7 +147,9 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ID = 8,
     VT_TIMEWAITING = 10,
     VT_BIRDS = 12,
-    VT_IDS = 14
+    VT_IDS = 14,
+    VT_SEED = 16,
+    VT_LASTTIMEWINER = 18
   };
   FlappyBird::Type type() const {
     return static_cast<FlappyBird::Type>(GetField<int8_t>(VT_TYPE, 0));
@@ -161,6 +169,12 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<uint8_t> *ids() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_IDS);
   }
+  uint32_t seed() const {
+    return GetField<uint32_t>(VT_SEED, 0);
+  }
+  bool lastTimeWiner() const {
+    return GetField<uint8_t>(VT_LASTTIMEWINER, 0) != 0;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int8_t>(verifier, VT_TYPE) &&
@@ -172,6 +186,8 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(birds()) &&
            VerifyOffset(verifier, VT_IDS) &&
            verifier.VerifyVector(ids()) &&
+           VerifyField<uint32_t>(verifier, VT_SEED) &&
+           VerifyField<uint8_t>(verifier, VT_LASTTIMEWINER) &&
            verifier.EndTable();
   }
 };
@@ -197,6 +213,12 @@ struct MessageBuilder {
   void add_ids(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids) {
     fbb_.AddOffset(Message::VT_IDS, ids);
   }
+  void add_seed(uint32_t seed) {
+    fbb_.AddElement<uint32_t>(Message::VT_SEED, seed, 0);
+  }
+  void add_lastTimeWiner(bool lastTimeWiner) {
+    fbb_.AddElement<uint8_t>(Message::VT_LASTTIMEWINER, static_cast<uint8_t>(lastTimeWiner), 0);
+  }
   explicit MessageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -216,11 +238,15 @@ inline flatbuffers::Offset<Message> CreateMessage(
     uint8_t id = 0,
     float timeWaiting = 0.0f,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FlappyBird::BirdInfo>>> birds = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids = 0,
+    uint32_t seed = 0,
+    bool lastTimeWiner = false) {
   MessageBuilder builder_(_fbb);
+  builder_.add_seed(seed);
   builder_.add_ids(ids);
   builder_.add_birds(birds);
   builder_.add_timeWaiting(timeWaiting);
+  builder_.add_lastTimeWiner(lastTimeWiner);
   builder_.add_id(id);
   builder_.add_birdType(birdType);
   builder_.add_type(type);
@@ -234,7 +260,9 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
     uint8_t id = 0,
     float timeWaiting = 0.0f,
     const std::vector<flatbuffers::Offset<FlappyBird::BirdInfo>> *birds = nullptr,
-    const std::vector<uint8_t> *ids = nullptr) {
+    const std::vector<uint8_t> *ids = nullptr,
+    uint32_t seed = 0,
+    bool lastTimeWiner = false) {
   auto birds__ = birds ? _fbb.CreateVector<flatbuffers::Offset<FlappyBird::BirdInfo>>(*birds) : 0;
   auto ids__ = ids ? _fbb.CreateVector<uint8_t>(*ids) : 0;
   return FlappyBird::CreateMessage(
@@ -244,7 +272,9 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
       id,
       timeWaiting,
       birds__,
-      ids__);
+      ids__,
+      seed,
+      lastTimeWiner);
 }
 
 inline const FlappyBird::Message *GetMessage(const void *buf) {
