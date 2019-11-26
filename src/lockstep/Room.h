@@ -26,7 +26,7 @@ public:
 
 private:
   const int kRoomLimit_ = 64;
-  const float kWaitTime_ = 3.0f;
+  const float kWaitTime_ = 7.0f;
   const float tick_ = 1 / 30.0f;
   const int kSecToUsec = 1000 * 1000;
 
