@@ -21,7 +21,7 @@ table Message{
   birds:[BirdInfo]; // Start
   ids:[uint8];  // Turn
 
-  seed:uint32;
+  seed:int32;
   lastTimeWiner:bool;
 }
 

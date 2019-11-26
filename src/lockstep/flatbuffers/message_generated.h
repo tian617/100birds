@@ -169,8 +169,8 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<uint8_t> *ids() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_IDS);
   }
-  uint32_t seed() const {
-    return GetField<uint32_t>(VT_SEED, 0);
+  int32_t seed() const {
+    return GetField<int32_t>(VT_SEED, 0);
   }
   bool lastTimeWiner() const {
     return GetField<uint8_t>(VT_LASTTIMEWINER, 0) != 0;
@@ -186,7 +186,7 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(birds()) &&
            VerifyOffset(verifier, VT_IDS) &&
            verifier.VerifyVector(ids()) &&
-           VerifyField<uint32_t>(verifier, VT_SEED) &&
+           VerifyField<int32_t>(verifier, VT_SEED) &&
            VerifyField<uint8_t>(verifier, VT_LASTTIMEWINER) &&
            verifier.EndTable();
   }
@@ -213,8 +213,8 @@ struct MessageBuilder {
   void add_ids(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids) {
     fbb_.AddOffset(Message::VT_IDS, ids);
   }
-  void add_seed(uint32_t seed) {
-    fbb_.AddElement<uint32_t>(Message::VT_SEED, seed, 0);
+  void add_seed(int32_t seed) {
+    fbb_.AddElement<int32_t>(Message::VT_SEED, seed, 0);
   }
   void add_lastTimeWiner(bool lastTimeWiner) {
     fbb_.AddElement<uint8_t>(Message::VT_LASTTIMEWINER, static_cast<uint8_t>(lastTimeWiner), 0);
@@ -239,7 +239,7 @@ inline flatbuffers::Offset<Message> CreateMessage(
     float timeWaiting = 0.0f,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FlappyBird::BirdInfo>>> birds = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids = 0,
-    uint32_t seed = 0,
+    int32_t seed = 0,
     bool lastTimeWiner = false) {
   MessageBuilder builder_(_fbb);
   builder_.add_seed(seed);
@@ -261,7 +261,7 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
     float timeWaiting = 0.0f,
     const std::vector<flatbuffers::Offset<FlappyBird::BirdInfo>> *birds = nullptr,
     const std::vector<uint8_t> *ids = nullptr,
-    uint32_t seed = 0,
+    int32_t seed = 0,
     bool lastTimeWiner = false) {
   auto birds__ = birds ? _fbb.CreateVector<flatbuffers::Offset<FlappyBird::BirdInfo>>(*birds) : 0;
   auto ids__ = ids ? _fbb.CreateVector<uint8_t>(*ids) : 0;

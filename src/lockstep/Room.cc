@@ -75,6 +75,7 @@ void Room::gameStart()
   MessageBuilder message(builder);
   message.add_type(Type_Start);
   message.add_birds(birds);
+  message.add_seed(time(nullptr));
   auto msg = message.Finish();
   builder.Finish(msg);
   for (auto &player : players_)

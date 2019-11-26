@@ -48,6 +48,7 @@ void Server::onDisConnect(const Connection *conn)
 {
   printf("close:%s\n", conn->name().c_str());
   removePlayerInRoom(players_[conn]->roomId(), players_[conn]);
+  players_.erase(conn);
 }
 
 void Server::removePlayerInRoom(long roomId, const std::shared_ptr<Player> &player)
@@ -64,7 +65,7 @@ void Server::removePlayerInRoom(long roomId, const std::shared_ptr<Player> &play
 void Server::playMsg(std::shared_ptr<Player> player)
 {
   printf("play\n");
-  if (rooms_[curWaitingRoom_]->isStart())
+  if (rooms_[curWaitingRoom_]==nullptr || rooms_[curWaitingRoom_]->isStart())
   {
     printf("create new room\n");
     curWaitingRoom_++;
@@ -80,7 +81,7 @@ void Server::playMsg(std::shared_ptr<Player> player)
 
 void Server::tapMsg(std::shared_ptr<Player> player, uint8_t id)
 {
-  printf("id:%d,tap\n", id);
+  // printf("id:%d,tap\n", id);
   rooms_[player->roomId()]->addTap(id);
 }
 
