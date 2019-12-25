@@ -7,7 +7,7 @@ namespace FlappyBird;
 // Turn: lockstep数据  --from server
 // Heartbe: 心跳包  --from client & server
 enum Type:byte {Play,SelfInfo,Start,Tap,Turn,Heartbeat}
-enum BirdType:byte {Red,Yellow,Blue,Num}
+enum BirdType:byte {Bird_1,Bird_2,Bird_3,Bird_4,Bird_5,Bird_6,Bird_7,Bird_8,Bird_9,Bird_10,Bird_11,Bird_12,Bird_13,Bird_14,Bird_15,Bird_16,Bird_17,Num}
 table BirdInfo{
   id:uint8;
   birdType:BirdType;
@@ -20,9 +20,10 @@ table Message{
   timeWaiting:float; // SelfInfo
   birds:[BirdInfo]; // Start
   ids:[uint8];  // Turn
-
   seed:int32;
-  lastTimeWiner:bool;
+
+  lastTimeWiner:bool; // 保留，todo 获得第一名，下局玩家有特殊标识
+  version:int32;   // 保留
 }
 
 root_type Message;

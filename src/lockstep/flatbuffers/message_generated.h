@@ -55,29 +55,71 @@ inline const char *EnumNameType(Type e) {
 }
 
 enum BirdType {
-  BirdType_Red = 0,
-  BirdType_Yellow = 1,
-  BirdType_Blue = 2,
-  BirdType_Num = 3,
-  BirdType_MIN = BirdType_Red,
+  BirdType_Bird_1 = 0,
+  BirdType_Bird_2 = 1,
+  BirdType_Bird_3 = 2,
+  BirdType_Bird_4 = 3,
+  BirdType_Bird_5 = 4,
+  BirdType_Bird_6 = 5,
+  BirdType_Bird_7 = 6,
+  BirdType_Bird_8 = 7,
+  BirdType_Bird_9 = 8,
+  BirdType_Bird_10 = 9,
+  BirdType_Bird_11 = 10,
+  BirdType_Bird_12 = 11,
+  BirdType_Bird_13 = 12,
+  BirdType_Bird_14 = 13,
+  BirdType_Bird_15 = 14,
+  BirdType_Bird_16 = 15,
+  BirdType_Bird_17 = 16,
+  BirdType_Num = 17,
+  BirdType_MIN = BirdType_Bird_1,
   BirdType_MAX = BirdType_Num
 };
 
-inline const BirdType (&EnumValuesBirdType())[4] {
+inline const BirdType (&EnumValuesBirdType())[18] {
   static const BirdType values[] = {
-    BirdType_Red,
-    BirdType_Yellow,
-    BirdType_Blue,
+    BirdType_Bird_1,
+    BirdType_Bird_2,
+    BirdType_Bird_3,
+    BirdType_Bird_4,
+    BirdType_Bird_5,
+    BirdType_Bird_6,
+    BirdType_Bird_7,
+    BirdType_Bird_8,
+    BirdType_Bird_9,
+    BirdType_Bird_10,
+    BirdType_Bird_11,
+    BirdType_Bird_12,
+    BirdType_Bird_13,
+    BirdType_Bird_14,
+    BirdType_Bird_15,
+    BirdType_Bird_16,
+    BirdType_Bird_17,
     BirdType_Num
   };
   return values;
 }
 
 inline const char * const *EnumNamesBirdType() {
-  static const char * const names[5] = {
-    "Red",
-    "Yellow",
-    "Blue",
+  static const char * const names[19] = {
+    "Bird_1",
+    "Bird_2",
+    "Bird_3",
+    "Bird_4",
+    "Bird_5",
+    "Bird_6",
+    "Bird_7",
+    "Bird_8",
+    "Bird_9",
+    "Bird_10",
+    "Bird_11",
+    "Bird_12",
+    "Bird_13",
+    "Bird_14",
+    "Bird_15",
+    "Bird_16",
+    "Bird_17",
     "Num",
     nullptr
   };
@@ -85,7 +127,7 @@ inline const char * const *EnumNamesBirdType() {
 }
 
 inline const char *EnumNameBirdType(BirdType e) {
-  if (e < BirdType_Red || e > BirdType_Num) return "";
+  if (e < BirdType_Bird_1 || e > BirdType_Num) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesBirdType()[index];
 }
@@ -133,7 +175,7 @@ struct BirdInfoBuilder {
 inline flatbuffers::Offset<BirdInfo> CreateBirdInfo(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint8_t id = 0,
-    FlappyBird::BirdType birdType = FlappyBird::BirdType_Red) {
+    FlappyBird::BirdType birdType = FlappyBird::BirdType_Bird_1) {
   BirdInfoBuilder builder_(_fbb);
   builder_.add_birdType(birdType);
   builder_.add_id(id);
@@ -149,7 +191,8 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_BIRDS = 12,
     VT_IDS = 14,
     VT_SEED = 16,
-    VT_LASTTIMEWINER = 18
+    VT_LASTTIMEWINER = 18,
+    VT_VERSION = 20
   };
   FlappyBird::Type type() const {
     return static_cast<FlappyBird::Type>(GetField<int8_t>(VT_TYPE, 0));
@@ -175,6 +218,9 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool lastTimeWiner() const {
     return GetField<uint8_t>(VT_LASTTIMEWINER, 0) != 0;
   }
+  int32_t version() const {
+    return GetField<int32_t>(VT_VERSION, 0);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int8_t>(verifier, VT_TYPE) &&
@@ -188,6 +234,7 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVector(ids()) &&
            VerifyField<int32_t>(verifier, VT_SEED) &&
            VerifyField<uint8_t>(verifier, VT_LASTTIMEWINER) &&
+           VerifyField<int32_t>(verifier, VT_VERSION) &&
            verifier.EndTable();
   }
 };
@@ -219,6 +266,9 @@ struct MessageBuilder {
   void add_lastTimeWiner(bool lastTimeWiner) {
     fbb_.AddElement<uint8_t>(Message::VT_LASTTIMEWINER, static_cast<uint8_t>(lastTimeWiner), 0);
   }
+  void add_version(int32_t version) {
+    fbb_.AddElement<int32_t>(Message::VT_VERSION, version, 0);
+  }
   explicit MessageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -234,14 +284,16 @@ struct MessageBuilder {
 inline flatbuffers::Offset<Message> CreateMessage(
     flatbuffers::FlatBufferBuilder &_fbb,
     FlappyBird::Type type = FlappyBird::Type_Play,
-    FlappyBird::BirdType birdType = FlappyBird::BirdType_Red,
+    FlappyBird::BirdType birdType = FlappyBird::BirdType_Bird_1,
     uint8_t id = 0,
     float timeWaiting = 0.0f,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FlappyBird::BirdInfo>>> birds = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ids = 0,
     int32_t seed = 0,
-    bool lastTimeWiner = false) {
+    bool lastTimeWiner = false,
+    int32_t version = 0) {
   MessageBuilder builder_(_fbb);
+  builder_.add_version(version);
   builder_.add_seed(seed);
   builder_.add_ids(ids);
   builder_.add_birds(birds);
@@ -256,13 +308,14 @@ inline flatbuffers::Offset<Message> CreateMessage(
 inline flatbuffers::Offset<Message> CreateMessageDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     FlappyBird::Type type = FlappyBird::Type_Play,
-    FlappyBird::BirdType birdType = FlappyBird::BirdType_Red,
+    FlappyBird::BirdType birdType = FlappyBird::BirdType_Bird_1,
     uint8_t id = 0,
     float timeWaiting = 0.0f,
     const std::vector<flatbuffers::Offset<FlappyBird::BirdInfo>> *birds = nullptr,
     const std::vector<uint8_t> *ids = nullptr,
     int32_t seed = 0,
-    bool lastTimeWiner = false) {
+    bool lastTimeWiner = false,
+    int32_t version = 0) {
   auto birds__ = birds ? _fbb.CreateVector<flatbuffers::Offset<FlappyBird::BirdInfo>>(*birds) : 0;
   auto ids__ = ids ? _fbb.CreateVector<uint8_t>(*ids) : 0;
   return FlappyBird::CreateMessage(
@@ -274,7 +327,8 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
       birds__,
       ids__,
       seed,
-      lastTimeWiner);
+      lastTimeWiner,
+      version);
 }
 
 inline const FlappyBird::Message *GetMessage(const void *buf) {

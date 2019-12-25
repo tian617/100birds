@@ -26,7 +26,6 @@ void Server::onConnect(const Connection *conn)
 
 void Server::onMessage(const Connection *conn, const char *data)
 {
-  // printf("msg:%s\n", data);
   auto message = GetMessage(data);
   switch (message->type())
   {
@@ -75,14 +74,12 @@ void Server::playMsg(std::shared_ptr<Player> player)
   {
     removePlayerInRoom(player->roomId(), player);
   }
-  printf("roomID:%d\n",curWaitingRoom_);
   player->setRoomId(curWaitingRoom_);
   rooms_[curWaitingRoom_]->addPlayer(player);
 }
 
 void Server::tapMsg(std::shared_ptr<Player> player, uint8_t id)
 {
-  // printf("id:%d,tap\n", id);
   rooms_[player->roomId()]->addTap(id);
 }
 
