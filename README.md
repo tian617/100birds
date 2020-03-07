@@ -1,1 +1,1 @@
-!()[https://gitee.com/gamenite/picture/raw/master/show.gif]
+![](https://gitee.com/gamenite/picture/raw/master/show.gif)
